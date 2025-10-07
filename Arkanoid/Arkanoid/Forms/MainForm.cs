@@ -8,6 +8,8 @@ namespace Arkanoid
         private List<Block> BlocksList = [];
         private const int RowsCount = 7;
         private const int ColumnsCount = 7;
+        private Platform platform;
+        private Ball ball;
 
         public MainForm()
         {
@@ -32,6 +34,17 @@ namespace Arkanoid
                     BlocksList.Add(new Block(blockHeight, blockWidth, x, y));
                 }
             }
+
+            var platformWidth = 130;
+            var platformHeight = 30;
+            var platformX = (ClientSize.Width - platformWidth) / 2;
+            var platformY = ClientSize.Height - 100;
+            platform = new Platform(platformHeight, platformWidth, platformX, platformY);
+
+            var ballSize = 30;
+            var ballX = platformX + (platformWidth - ballSize) / 2;
+            var ballY = platformY - ballSize;
+            ball = new Ball(ballX, ballY, ballSize, ballSize);
         }
 
         private void MainForm_Paint(object sender, PaintEventArgs e)
@@ -42,9 +55,17 @@ namespace Arkanoid
                 {
                     Rectangle blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
                     e.Graphics.FillRectangle(Brushes.Pink, blockRect);
-                    e.Graphics.DrawRectangle(Pens.LightCyan, blockRect);
+                    e.Graphics.DrawRectangle(Pens.White, blockRect);
                 }
             }
+
+            Rectangle platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
+            e.Graphics.FillRectangle(Brushes.LightGray, platformRect);
+            e.Graphics.DrawRectangle(Pens.White, platformRect);
+
+            Rectangle ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
+            e.Graphics.FillEllipse(Brushes.Pink, ballRect);
+            e.Graphics.DrawEllipse(Pens.White, ballRect);
         }
     }
 }
