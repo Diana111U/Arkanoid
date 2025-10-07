@@ -35,13 +35,15 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightCyan;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(904, 552);
             ForeColor = SystemColors.ControlText;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "MainForm";
             Text = "Arkanoid";
+            Load += MainForm_Load;
+            Paint += MainForm_Paint;
             ResumeLayout(false);
         }
 
