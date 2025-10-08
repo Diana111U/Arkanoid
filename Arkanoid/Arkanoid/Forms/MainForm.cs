@@ -3,7 +3,7 @@
 namespace Arkanoid
 {
     public partial class MainForm : Form
-    {   
+    {
         //Объявление переменных
         private Random rdn = new Random();
         private List<Block> BlocksList = [];
@@ -11,6 +11,9 @@ namespace Arkanoid
         private const int ColumnsCount = 7;
         private Platform platform;
         private Ball ball;
+        private int ballSpeedX = 3;
+        private int ballSpeedY = -3;
+        private bool IsGameStart = false;
 
         public MainForm()
         {
@@ -103,6 +106,64 @@ namespace Arkanoid
 
             //Перерисовка формы
             this.Invalidate();
+        }
+
+        private void timerBall_Tick(object sender, EventArgs e)
+        {
+            //Двигаем шарик по координатам 
+            ball.X += ballSpeedX;
+            ball.Y += ballSpeedY;
+
+            //Столкновение с границами формы
+            if (ball.X <= 0 || ball.X + ball.Width >= ClientSize.Width)
+            {
+                ballSpeedX = -ballSpeedX;
+            }
+            if (ball.Y <= 0)
+            {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            //Создание шарика с новыми координатами
+            Rectangle ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
+
+            //Создание платформы с новыми координатами
+            Rectangle platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
+            if (ballRect.IntersectsWith(platformRect))
+            {
+                ballSpeedY = -ballSpeedY; //Отскок вверх
+            }
+
+            //Столкновение шарика с блоками
+            foreach (var block in BlocksList)
+            {
+                if (block.Health > 0)
+                {
+                    Rectangle blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
+                    if (ballRect.IntersectsWith(blockRect))
+                    {
+                        block.Punch(); //Уменьшаем здоровье блока
+                        ballSpeedY = -ballSpeedY; //Отскок от блока
+                        break;
+                    }
+                }
+            }
+
+            //Проверка проигрыша
+            if (ball.Y > ClientSize.Height)
+            {
+                timerBall.Stop();
+                MessageBox.Show("Вы проиграли! Попробуйте ещё раз( У вас всё получится :)", "Проигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+            }
+
+            //Перерисовка формы
+            this.Invalidate();
+        }
+
+        private void MainForm_MouseClick(object sender, MouseEventArgs e)
+        {
+            timerBall.Start();
         }
     }
 }
