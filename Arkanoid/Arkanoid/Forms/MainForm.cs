@@ -101,8 +101,11 @@ namespace Arkanoid
             //Смена координатов платформы
             platform.X = newPlatformX;
 
-            //Координата x шарика по координате середины платформы
-            ball.X = platform.X + (platform.Width - ball.Width) / 2;
+            if (IsGameStart==false)
+            {
+                //Координата x шарика по координате середины платформы
+                ball.X = platform.X + (platform.Width - ball.Width) / 2;
+            }
 
             //Перерисовка формы
             this.Invalidate();
@@ -149,6 +152,9 @@ namespace Arkanoid
                 }
             }
 
+            //Перерисовка формы
+            this.Invalidate();
+
             //Проверка проигрыша
             if (ball.Y > ClientSize.Height)
             {
@@ -157,13 +163,36 @@ namespace Arkanoid
                 this.Close();
             }
 
-            //Перерисовка формы
-            this.Invalidate();
+            //Проверка выигрыша
+            if (IsWon()==true)
+            {
+                timerBall.Stop();
+                MessageBox.Show("Вы выиграли!!!! Сыграйте ещё раз:)", "Выигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+            }
         }
 
+        /// <summary>
+        /// Метод клика мышки
+        /// </summary>
         private void MainForm_MouseClick(object sender, MouseEventArgs e)
         {
             timerBall.Start();
+            IsGameStart = true;
+        }
+
+        /// <summary>
+        /// Метод проверки выигрыша 
+        /// </summary>
+        private bool IsWon()
+        {
+            foreach(var block in BlocksList)
+            {
+                if (block.Health > 0)
+                    return false;
+            }
+
+            return true;
         }
     }
 }
