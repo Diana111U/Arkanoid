@@ -5,14 +5,11 @@ namespace Arkanoid
     public partial class MainForm : Form
     {
         //Объявление переменных
-        private Random rdn = new Random();
         private List<Block> BlocksList = [];
         private const int RowsCount = 7;
         private const int ColumnsCount = 7;
-        private Platform platform;
-        private Ball ball;
-        private int ballSpeedX = 3;
-        private int ballSpeedY = -3;
+        private Platform platform = null;
+        private Ball ball = null;
         private bool IsGameStart = false;
 
         public MainForm()
@@ -68,19 +65,19 @@ namespace Arkanoid
             {
                 if (block.Health > 0)
                 {
-                    Rectangle blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
+                    var blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
                     e.Graphics.FillRectangle(Brushes.Pink, blockRect);
                     e.Graphics.DrawRectangle(Pens.White, blockRect);
                 }
             }
 
             //Отображение платформы
-            Rectangle platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
+            var platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
             e.Graphics.FillRectangle(Brushes.LightGray, platformRect);
             e.Graphics.DrawRectangle(Pens.White, platformRect);
 
             //Отображение шарика
-            Rectangle ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
+            var ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
             e.Graphics.FillEllipse(Brushes.Pink, ballRect);
             e.Graphics.DrawEllipse(Pens.White, ballRect);
         }
@@ -94,9 +91,14 @@ namespace Arkanoid
             int newPlatformX = e.X - platform.Width / 2;
 
             //Обозначаем границы формы
-            if (newPlatformX < 0) newPlatformX = 0;
+            if (newPlatformX < 0)
+            {
+                newPlatformX = 0;
+            }
             if (newPlatformX > ClientSize.Width - platform.Width)
-                newPlatformX = ClientSize.Width - platform.Width;
+            { 
+                newPlatformX = ClientSize.Width - platform.Width; 
+            }
 
             //Смена координатов платформы
             platform.X = newPlatformX;
@@ -114,27 +116,27 @@ namespace Arkanoid
         private void timerBall_Tick(object sender, EventArgs e)
         {
             //Двигаем шарик по координатам 
-            ball.X += ballSpeedX;
-            ball.Y += ballSpeedY;
+            ball.X += ball.BallSpeedX;
+            ball.Y += ball.BallSpeedY;
 
             //Столкновение с границами формы
             if (ball.X <= 0 || ball.X + ball.Width >= ClientSize.Width)
             {
-                ballSpeedX = -ballSpeedX;
+                ball.BallSpeedX = -ball.BallSpeedX;
             }
             if (ball.Y <= 0)
             {
-                ballSpeedY = -ballSpeedY;
+                ball.BallSpeedY = -ball.BallSpeedY;
             }
 
             //Создание шарика с новыми координатами
-            Rectangle ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
+            var ballRect = new Rectangle(ball.X, ball.Y, ball.Width, ball.Height);
 
             //Создание платформы с новыми координатами
-            Rectangle platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
+            var platformRect = new Rectangle(platform.X, platform.Y, platform.Width, platform.Height);
             if (ballRect.IntersectsWith(platformRect))
             {
-                ballSpeedY = -ballSpeedY; //Отскок вверх
+                ball.BallSpeedY = -ball.BallSpeedY; //Отскок вверх
             }
 
             //Столкновение шарика с блоками
@@ -142,11 +144,20 @@ namespace Arkanoid
             {
                 if (block.Health > 0)
                 {
-                    Rectangle blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
+                    var blockRect = new Rectangle(block.X, block.Y, block.Width, block.Height);
                     if (ballRect.IntersectsWith(blockRect))
                     {
                         block.Punch(); //Уменьшаем здоровье блока
-                        ballSpeedY = -ballSpeedY; //Отскок от блока
+                        ball.BallSpeedY = -ball.BallSpeedY; //Отскок от блока
+                        //Проверка выигрыша
+                        if (IsWon() == true)
+                        {
+                            //Перерисовка формы
+                            this.Invalidate();
+                            timerBall.Stop();
+                            MessageBox.Show("Вы выиграли!!!! Сыграйте ещё раз:)", "Выигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Close();
+                        }
                         break;
                     }
                 }
@@ -159,15 +170,7 @@ namespace Arkanoid
             if (ball.Y > ClientSize.Height)
             {
                 timerBall.Stop();
-                MessageBox.Show("Вы проиграли! Попробуйте ещё раз( У вас всё получится :)", "Проигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                this.Close();
-            }
-
-            //Проверка выигрыша
-            if (IsWon()==true)
-            {
-                timerBall.Stop();
-                MessageBox.Show("Вы выиграли!!!! Сыграйте ещё раз:)", "Выигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Вы проиграли! Попробуйте ещё раз(\n У вас всё получится :)", "Проигрыш", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.Close();
             }
         }
@@ -184,15 +187,6 @@ namespace Arkanoid
         /// <summary>
         /// Метод проверки выигрыша 
         /// </summary>
-        private bool IsWon()
-        {
-            foreach(var block in BlocksList)
-            {
-                if (block.Health > 0)
-                    return false;
-            }
-
-            return true;
-        }
+        private bool IsWon() => BlocksList.All(x => x.Health == 0);
     }
 }
