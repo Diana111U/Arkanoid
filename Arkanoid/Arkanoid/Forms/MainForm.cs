@@ -8,8 +8,8 @@ namespace Arkanoid
         private List<Block> BlocksList = [];
         private const int RowsCount = 7;
         private const int ColumnsCount = 7;
-        private Platform platform = null;
-        private Ball ball = null;
+        private Platform platform = null!;
+        private Ball ball = null!;
         private bool IsGameStart = false;
 
         public MainForm()
@@ -88,7 +88,7 @@ namespace Arkanoid
         private void MainForm_MouseMove(object sender, MouseEventArgs e)
         {
             //Координата x платформы по координате х мышки
-            int newPlatformX = e.X - platform.Width / 2;
+            var newPlatformX = e.X - platform.Width / 2;
 
             //Обозначаем границы формы
             if (newPlatformX < 0)
